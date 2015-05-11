@@ -11,8 +11,10 @@ function drawAnd(context, x, y)
 	context.translate(x-s/2,y-s/2);
 	context.moveTo(0,0);
 	context.lineTo(s/2,0);
-	context.arc(s/2,s/2,s/2,-Math.PI/2,Math.PI/2);
-	context.moveTo(s/2,s);
+	//context.arc(s/2,s/2,s/2,-Math.PI/2,Math.PI/2);
+	//context.moveTo(s/2,s);
+	context.arcTo(s,0,s,s,s/2);
+	context.arcTo(s,s,0,s,s/2);
 	context.lineTo(0,s);
 	context.lineTo(0,0);
 	context.stroke();
@@ -57,9 +59,11 @@ function drawXor(context, x, y)
 	context.translate(s/2-x,s/2-y);	
 }
 
-function update(context)
+function update(timestamp)
 {
-	var scale = 2
+	//console.log(timestamp);
+	requestAnimationFrame(update);
+	var scale = 2;
 	context.scale(scale,scale);
 	context.clearRect(0, 0, canvas.width, canvas.height);
 	drawAnd(context,100/scale,100/scale);
@@ -75,5 +79,5 @@ function update(context)
 	y++;
 }
 
-
-var timer = setInterval(update,1000/25, context);
+update(0.0);
+//var timer = setInterval(update,17);
