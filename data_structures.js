@@ -84,7 +84,7 @@ BinaryTree.prototype = {
 			return this.free.dequeue();
 	},
 	getDir: function(i,val) {
-		return this.less(val,this.data[i])?Dir.LEFT,Dir.RIGHT;
+		return this.less(val,this.data[i])?Dir.LEFT:Dir.RIGHT;
 	},
 	getChild: function(i,dir){
 		if(dir == Dir.LEFT)
@@ -143,7 +143,7 @@ BinaryTree.prototype = {
 	},
 	rotate: function(i,dir){
 		//TODO
-	}
+	},
 	reserve: function(count){
 		if(count < this.reserved)
 			return;
