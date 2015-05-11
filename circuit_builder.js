@@ -7,8 +7,9 @@ var s = 32; //size
 
 function drawAnd(context, x, y)
 {
-	context.beginPath();
+	context.save();
 	context.translate(x-s/2,y-s/2);
+	context.beginPath();
 	context.moveTo(0,0);
 	context.lineTo(s/2,0);
 	//context.arc(s/2,s/2,s/2,-Math.PI/2,Math.PI/2);
@@ -17,12 +18,16 @@ function drawAnd(context, x, y)
 	context.arcTo(s,s,0,s,s/2);
 	context.lineTo(0,s);
 	context.lineTo(0,0);
+
+	context.fill();
 	context.stroke();
-	context.translate(s/2-x,s/2-y);
+	//context.translate(s/2-x,s/2-y);
+	context.restore();
 }
 
 function drawOr(context, x, y)
 {
+	context.save();
 	context.translate(x-s/2,y-s/2);
 	context.beginPath();
 	context.moveTo(0,0);
@@ -31,39 +36,58 @@ function drawOr(context, x, y)
     context.quadraticCurveTo(0.71*s,s,s/4,s);
     context.lineTo(0,s);
     context.quadraticCurveTo(s/4,s/2,0,0);
+	
+	context.fill();
 	context.stroke();
-	context.translate(s/2-x,s/2-y);	
+	//context.translate(s/2-x,s/2-y);
+	context.restore();
 }
 
 function drawBuf(context, x, y)
 {
+	context.save();
 	context.translate(x-s/2,y-s/2);
 	context.beginPath();
 	context.moveTo(0,0);
 	context.lineTo(s,s/2);
 	context.lineTo(0,s);
 	context.lineTo(0,0);
+
+	context.fill();
 	context.stroke();
-	context.translate(s/2-x,s/2-y);	
+	//context.translate(s/2-x,s/2-y);
+	context.restore();
 }
 
 function drawXor(context, x, y)
 {
 	drawOr(context,x,y);
+	context.save();
 	context.translate(x-s/2,y-s/2);
 	context.beginPath();
 	context.moveTo(-s/8,0);
 	context.quadraticCurveTo(s/8,s/2,-s/8,s);
     //context.quadraticCurveTo(s/8,s/2,-s/8,0);
+	
 	context.stroke();
-	context.translate(s/2-x,s/2-y);	
+	//context.translate(s/2-x,s/2-y);
+	context.restore();
 }
+
+var lastTime = 0;//time of last frame from start of program in ms
+var deltaFrames = 0; //number of frames that have passed
+var deltaTime = 0; //in seconds
+var MS_PER_FRAME = 17; //60 FPS
 
 function update(timestamp)
 {
+	deltaTime = (timestamp - lastTime) / 1000.0;
+	deltaFrames = (timestamp - lastTime) / MS_PER_FRAME;
+	lastTime = timestamp;
 	//console.log(timestamp);
 	requestAnimationFrame(update);
 	var scale = 2;
+	context.save();
 	context.scale(scale,scale);
 	context.clearRect(0, 0, canvas.width, canvas.height);
 	drawAnd(context,100/scale,100/scale);
@@ -74,10 +98,11 @@ function update(timestamp)
 	context.moveTo(0,y);
 	context.lineTo(x,0);
 	context.stroke();
-	context.scale(1/scale,1/scale);
-	x++;
-	y++;
+	context.restore();
+	x+=deltaFrames;
+	y+=deltaFrames;
 }
 
+context.fillStyle = "#88F2A0"
 update(0.0);
 //var timer = setInterval(update,17);
