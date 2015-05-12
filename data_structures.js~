@@ -181,7 +181,7 @@ BinaryTree.prototype = {
 		this.left = nLeft;
 		this.right = nRight;
 		this.free = nFree;
-		this.depth[i] = -1;
+		this.depth[i] = nDepth;
 		this.reserved = count;
 	}
 };

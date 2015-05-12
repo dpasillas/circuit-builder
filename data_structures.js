@@ -7,7 +7,6 @@ function Queue(size) {
 	//keep track of where we'll 
 	this.head = 0;
 	this.tail = 0;
-	
 }
 
 //dir enum
@@ -16,13 +15,21 @@ Dir = {
 	LEFT:1,
 	RIGHT:2,
 	opposite:function(dir){
-		
+		switch(dir){
+			case Dir.LEFT:
+				return Dir.RIGHT;
+			case Dir.RIGHT:
+				return Dir.LEFT;
+			default:
+				return Dir.NONE;
+		}
 	}
 };
+
+
+
 if(Object.freeze)
 	Object.freeze(Dir);
-
-
 
 Queue.prototype = {
 	reserve: function(count){
@@ -110,6 +117,7 @@ BinaryTree.prototype = {
 		this.data[index] = val;
 		this.left[index] = -1;
 		this.right[index] = -1;
+		this.depth[index] = 1;
 		return index;
 	},
 	insert: function(val){
@@ -121,11 +129,14 @@ BinaryTree.prototype = {
 			this.root = this.store(val);
 		}
 		else {
-			insertAt(this.root,val);
+			insertAt(this.root,val,0,-1);
 		}
 		
 	},
-	insertAt: function(i,val) {
+	//i - current index
+	//val - data to be stored
+	//p - parent index
+	insertAt: function(i,val,p) {
 		if(this.equiv(val,this.data[i])){
 			this.data[i] = val;
 			return false;
@@ -134,18 +145,19 @@ BinaryTree.prototype = {
 		var child = this.getChild(i,dir);
 		
 		if(child == -1){
-			this.setChild(i,dir,this.store(val));
+			var c = this.store(val);
+			this.setChild(i,dir,c);
 			return true;
 		}
 		else {
-			return this.insertAt(child,val) && balanceAt(i);
+			return this.insertAt(child,val,i) && balanceAt(i);
 		}
 	},
 	balanceAt: function(i){
 		//TODO
 		return true;
 	},
-	rotate: function(i,dir){
+	rotate: function(i,dir,p,dp){
 		//TODO
 	},
 	reserve: function(count){
