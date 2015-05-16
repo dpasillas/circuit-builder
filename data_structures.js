@@ -33,8 +33,6 @@ Dir = {
 	}
 };
 
-
-
 if(Object.freeze)
 	Object.freeze(Dir);
 
@@ -72,13 +70,13 @@ Queue.prototype = {
 };
 
 //Binary Tree with removeFirst
-function BinaryTree(size, lessThan, equiv) {
+function BinaryTree(size, lessThan, eq) {
 	this.reserved = 0;
 	this.data = [];
 	this.left = [];
 	this.right = [];
 	//keep track of empty spaces we can use, so data is roughly contiguous in memory.
-	this.free = [];
+	this.free = new Queue(100);
 	this.weight = [];
 	var count = (Number.isInteger(size) && size > 31 && size) || 256;
 	this.reserve(count);
@@ -87,19 +85,31 @@ function BinaryTree(size, lessThan, equiv) {
 	// to determine rank	
 	this.less = lessThan || function(a,b) { return a < b; };
 	// to determine if data should be replaced
-	this.eq = equiv || function(a,b) {return a == b; };
+	this.equiv = eq || function(a,b) {return a == b; };
 	this.tail = 0;
 }
 
 BinaryTree.prototype = {
+	_doFunc(func,index){
+		if(index == -1)
+			return;
+		
+		this._doFunc(func,this.left[index]);
+		func(this.data[index]);
+		this._doFunc(func,this.right[index]);
+	},	
+	doFunc:function(func){
+		this._doFunc(func,this.root);
+	},
 	isEmpty: function() {
 		return this.root < 0;
 	},
 	nextFree: function(){
-		if(this.free.isEmpty())
+		var f = this.free;
+		if(f.isEmpty())
 			return this.tail++;
 		else
-			return this.free.dequeue();
+			return f.dequeue();
 	},
 	getDir: function(i,val) {
 		return this.less(val,this.data[i])?Dir.LEFT:Dir.RIGHT;
@@ -114,6 +124,8 @@ BinaryTree.prototype = {
 		else throw "invalid direction, no child to get";
 	},
 	setChild: function(i,dir,child){
+		if(i < 0)
+			return;
 		if(dir == Dir.LEFT)
 			this.left[i] = child;
 		else if(dir == Dir.RIGHT)
@@ -127,7 +139,7 @@ BinaryTree.prototype = {
 		this.left[index] = -1;
 		this.right[index] = -1;
 		this.weight[index] = 1;
-		this.tail = max(this.tail,index);
+		this.tail = Math.max(this.tail,index);
 		return index;
 	},
 	getWeight: function(index){
@@ -144,19 +156,35 @@ BinaryTree.prototype = {
 	reweigh: function(index){
 		var l = this.left[index];
 		var r = this.right[index];
-		this.setWeight(index, max(this.getWeight(l),this.getWeight(r))+1);
+		this.setWeight(index, Math.max(this.getWeight(l),this.getWeight(r))+1);
 		return true;
 	},
-	removeFirst: function(){
-		if(root < 0)
-			return null;
-		var lparent = -1;
-		var lchild = root;
-		while( this.left[lchild] > 0){
-			parent = lchild;
-			lchild = this.left[lchild];
+	blowAway: function(index){
+		if(this.root === index)
+			this.root = -1;
+		this.left[index] = -1;
+		this.right[index] = -1;
+		this.data[index] = null;
+		this.weight[index] = 0;
+		this.free.enqueue(index);
+	},
+	_removeFirst: function(index, parent){
+		if(this.left[index] != -1){
+			var data = this._removeFirst(this.left[index],index);
+			return this.reweigh(index) && this.balanceAt(index,parent,Dir.LEFT) && data;
 		}
-		
+		//we are at the left-most of the current branch
+		this.setChild(parent,Dir.LEFT,this.right[index]);
+		if(index === this.root)
+			this.root = this.right[index];
+		var data = this.data[index];
+		this.blowAway(index);
+		return data;
+	},
+	removeFirst: function(){
+		if(this.root < 0)
+			return null;
+		return this._removeFirst(this.root,-1);
 		//TODO get right-most child of leftmost child
 	},
 	insert: function(val){
@@ -164,11 +192,11 @@ BinaryTree.prototype = {
 			this.reserve(this.reserved*2);
 		}
 		
-		if(root < 0) {
+		if(this.root < 0) {
 			this.root = this.store(val);
 		}
 		else {
-			this.insertAt(this.root,val,0,-1,Dir.NONE);
+			this.insertAt(this.root,val,-1,Dir.NONE);
 		}
 		
 	},
@@ -186,7 +214,7 @@ BinaryTree.prototype = {
 		if(child == -1){
 			var c = this.store(val);
 			this.setChild(i,dir,c);
-			return true;
+			return this.reweigh(i);
 		}
 		else {
 			return this.insertAt(child,val,i,dir) && this.reweigh(i) && this.balanceAt(i,p,pd);
@@ -197,16 +225,16 @@ BinaryTree.prototype = {
 		var rw = this.getWeight(this.right[i]);
 		var d = Dir.getDir(rw-lw);
 		var o = Dir.opposite(d);
-		var diff = abs(rw - lw);
+		var diff = Math.abs(rw - lw);
 		
 		//we must maintain a weight difference of no more than 1
 		if(diff > 1) {
 			var child = this.getChild(i,d);
-			lw = this.getWeight(child.left[i]);
-			rw = this.getWeight(child.right[i]);
+			lw = this.getWeight(this.getChild(child,Dir.LEFT));//child.left[i]);
+			rw = this.getWeight(this.getChild(child,Dir.RIGHT));//child.right[i]);
 			var dc = Dir.getDir(rw-lw);
-			var oc = Dir.opposite(d);
-			diff = abs(rw - lw);
+			var oc = Dir.opposite(dc);
+			diff = Math.abs(rw - lw);
 			
 			//if the child is heavier in the opposite side of the parent
 			if(diff > 0 && dc === o)
@@ -229,9 +257,9 @@ BinaryTree.prototype = {
 		this.setChild(mid,dir,top);
 		this.setChild(top,odir,bot);
 
-		var td = max(this.getWeight(this.getChild(top,dir)), this.getWeight(bot))+1; 
+		var td = Math.max(this.getWeight(this.getChild(top,dir)), this.getWeight(bot))+1; 
 		this.setWeight(top, td);
-		this.setWeight(mid, max(td, this.getWeight(this.getChild(mid,odir)))+1);
+		this.setWeight(mid, Math.max(td, this.getWeight(this.getChild(mid,odir)))+1);
 	},
 	reserve: function(count){
 		if(count < this.reserved)
@@ -243,7 +271,6 @@ BinaryTree.prototype = {
 		var nData = new Array(count);
 		var nLeft = new Array(count);
 		var nRight = new Array(count);
-		var nFree = new Array(count);
 		var nWeight = new Array(count);
 
 		var i;
@@ -251,7 +278,6 @@ BinaryTree.prototype = {
 			nData[i] = this.data[i];
 			nLeft[i] = this.left[i];
 			nRight[i] = this.right[i];
-			nFree[i] = this.free[i];
 			nWeight[i] = this.weight[i];
 			
 		}
@@ -259,14 +285,30 @@ BinaryTree.prototype = {
 			nData[i] = null;
 			nLeft[i] = -1;
 			nRight[i] = -1;
-			nFree[i] = -1;
-			nWeight[i] = -1;
+			nWeight[i] = 0;
 		}
 		this.data = nData;
 		this.left = nLeft;
 		this.right = nRight;
-		this.free = nFree;
 		this.weight[i] = nWeight;
 		this.reserved = count;
 	}
 };
+
+var values = [0.43347430042922497,0.5492096962407231,0.3682410498149693,
+			0.5247329715639353,0.7891697415616363,0.8670410830527544,
+			0.8565823347307742,0.14844881370663643,0.5637879262212664,0.025582301430404186]
+
+var BT = new BinaryTree();
+for(i = 0; i < 10; ++i)
+{
+	var k = values[i];//Math.random();
+	console.log(k);
+	BT.insert(k);
+}
+console.log("Derp!");
+BT.doFunc(function(arg){console.log(arg);});
+console.log("Herp!Derp!");
+while(!BT.isEmpty()){
+	console.log(BT.removeFirst());
+}
