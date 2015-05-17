@@ -90,7 +90,7 @@ function BinaryTree(size, lessThan, eq) {
 }
 
 BinaryTree.prototype = {
-	_doFunc(func,index){
+	_doFunc: function(func,index){
 		if(index == -1)
 			return;
 		
@@ -294,21 +294,3 @@ BinaryTree.prototype = {
 		this.reserved = count;
 	}
 };
-
-var values = [0.43347430042922497,0.5492096962407231,0.3682410498149693,
-			0.5247329715639353,0.7891697415616363,0.8670410830527544,
-			0.8565823347307742,0.14844881370663643,0.5637879262212664,0.025582301430404186]
-
-var BT = new BinaryTree();
-for(i = 0; i < 10; ++i)
-{
-	var k = values[i];//Math.random();
-	console.log(k);
-	BT.insert(k);
-}
-console.log("Derp!");
-BT.doFunc(function(arg){console.log(arg);});
-console.log("Herp!Derp!");
-while(!BT.isEmpty()){
-	console.log(BT.removeFirst());
-}
