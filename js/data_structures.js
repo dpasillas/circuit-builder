@@ -269,9 +269,9 @@ BinaryTree.prototype = {
 		//	as long as their size is static, so we create new arrays
 		//	instead of growing existing ones.
 		var nData = new Array(count);
-		var nLeft = new Array(count);
-		var nRight = new Array(count);
-		var nWeight = new Array(count);
+		var nLeft = new Int32Array(count);
+		var nRight = new Int32Array(count);
+		var nWeight = new Int32Array(count);
 
 		var i;
 		for(i = 0; i < this.reserved; ++i){
@@ -294,3 +294,5 @@ BinaryTree.prototype = {
 		this.reserved = count;
 	}
 };
+
+

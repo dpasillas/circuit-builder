@@ -1,0 +1,11 @@
+Paper.js seems to have issues loading files from the local file system.
+In order to correct this, we can set up an http server, using python.
+
+REQUIREMENTS
+	install python on your computer
+	make sure you can call python from the terminal
+
+1. Open the terminal, and cd to the project directory, where we have index.html
+2. type "python -m SimpleHTTPServer"
+	a.	if that doesn't work, and you have Python3 installed, type "python -m http.server"
+3. view local changes by visiting "localhost:8000" or "127.0.0.1:8000" in your browser.
