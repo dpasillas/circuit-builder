@@ -4,7 +4,7 @@ function Queue(size) {
 	this.reserved = 0;
 	var count = (Number.isInteger(size) && size > 16 && size) || 32;
 	this.reserve(count);
-	//keep track of where we'll 
+	//keep track of where we'll insert/remove items
 	this.head = 0;
 	this.tail = 0;
 }
@@ -14,12 +14,18 @@ Dir = {
 	NONE:0,
 	LEFT:1,
 	RIGHT:2,
+	UP: 3,
+	DOWN: 4,
 	opposite:function(dir){
 		switch(dir){
 			case Dir.LEFT:
 				return Dir.RIGHT;
 			case Dir.RIGHT:
 				return Dir.LEFT;
+			case Dir.UP:
+				return Dir.DOWN;
+			case Dir.DOWN:
+				return Dir.UP;
 			default:
 				return Dir.NONE;
 		}
@@ -70,7 +76,9 @@ Queue.prototype = {
 };
 
 //Binary Tree with removeFirst
-function BinaryTree(size, lessThan, eq) {
+//	args: size, lessThan, equiv
+function BinaryTree(args) {
+	args = args || {};
 	this.reserved = 0;
 	this.data = [];
 	this.left = [];
@@ -78,18 +86,29 @@ function BinaryTree(size, lessThan, eq) {
 	//keep track of empty spaces we can use, so data is roughly contiguous in memory.
 	this.free = new Queue(100);
 	this.weight = [];
-	var count = (Number.isInteger(size) && size > 31 && size) || 256;
+	var count = (Number.isInteger(args.size) && args.size > 31 && args.size) || 256;
 	this.reserve(count);
 
 	this.root = -1;
 	// to determine rank	
-	this.less = lessThan || function(a,b) { return a < b; };
+	this.less = args.lessThan || function(a,b) { return a < b; };
 	// to determine if data should be replaced
-	this.equiv = eq || function(a,b) {return a == b; };
+	this.equiv = args.equiv || function(a,b) {return a == b; };
 	this.tail = 0;
 }
 
 BinaryTree.prototype = {
+	_peek:function(index){
+		if(this.left[index] >= 0)
+			return this._peek(this.left[index]);
+		else
+			return this.data[index];
+	}	
+	peek: function(){
+		if(root == -1)
+			return undefined;
+		return _peek(root);
+	},
 	_doFunc: function(func,index){
 		if(index == -1)
 			return;
@@ -295,4 +314,37 @@ BinaryTree.prototype = {
 	}
 };
 
+//paperjs groups cannot ungroup without removing items from the project
+//	this cause the items to be removed from all other groups as well.
+function ItemGroup(){
+	this.children = this._createTree();
+}
 
+ItemGroup.prototype = {
+	_createTree: function(){
+		var tree = new BinaryTree({
+			lessThan: function(a,b){return a.id < b.id;},
+			equiv: function(a,b){return a.id == b.id;}
+		});
+		return tree;
+	}
+	addChild: function(child){
+		this.children.insert(child);
+	},
+	removeChildren: function(){
+		this.children = new BinaryTree
+	},
+	translate: function(delta){
+		this.children.doFunc(function(item){item.translate(delta);});
+	},
+	rotate: function(angle,pivot){
+		pivot = pivot || this.getBounds().center;
+		this.children.doFunc(function(item){item.rotate(angle,pivot);});
+	},
+	setVisible(visible){
+		this.children.doFunc(function(item){item.visible = false;});
+	},
+	hitTest(point,options){
+
+	}
+};

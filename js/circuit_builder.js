@@ -3,33 +3,45 @@ var canvas = view.element;
 var s = 32;
 var x = 100;
 var y = 100;
-var gateStyle = {strokeColor:'black',
-					strokeScaling: true,
-					fillColor: 'white',
-					strokeWidth: 2,
-					dashArray: undefined
-				};
 
-var selectStroke = new Color('#3399FF');
-var selectFill = new Color('#0080FF');
-selectFill.alpha = 0.25;
-var selectedStyle = {strokeColor: selectStroke,
+//styling attributes
+Styles = {
+	Default:		{strokeColor:'black',
 						strokeScaling: true,
-						fillColor: selectFill,
+						fillColor: 'white',
 						strokeWidth: 2,
-						dashArray: [4, 4]
-					};
-var mainLayer = project.activeLayer;
-var gridLayer = new Layer();
-mainLayer.activate();
+						dashArray: undefined},
+	Selected:		{strokeColor: new Color('#3399FF'),
+						strokeScaling: true,
+						fillColor: new Color(0.25,0.75,1.0,0.5),
+						strokeWidth: 2,
+						dashArray: [4, 4]},
+	PinDefault:		{strokeColor:'black',
+						strokeScaling: true,
+						fillColor: 'white',
+						strokeWidth: 2,
+						dashArray: undefined},
+	PinSelected:	{strokeColor: new Color('#800000'),
+						strokeScaling: true,
+						fillColor: new Color(1.0,0.0,0.0,0.5),
+						strokeWidth: 2,
+						dashArray: [4, 4]}
+};
 
-var selected = new Group();
+//separate groups so we can toggle visibility
+var mainGroup = new ItemGroup();
+var connectionsGroup = new ItemGroup();
+var gridGroup = new ItemGroup();
+
+var selected = new ItemGroup();
 
 createGates();
 
+console.log(view.element.style);
+
 //create symbols for logic gate primitives
 function createAnd(x,y){
-	var AND = new Path(gateStyle);
+	var AND = new Path(Styles.Default);
 	AND.moveTo(0,0);
 	AND.lineTo(s/2,0);
 	AND.arcTo(new Point(s,s/2), new Point(s/2,s));
@@ -37,11 +49,13 @@ function createAnd(x,y){
 	AND.closePath(true);
 	AND.translate(new Point(x-s/2,y-s/2));
 
+	mainGroup.addChild(AND);
+
 	return AND;
 }
 
 function createOr(x,y){
-	var OR = new Path(gateStyle);
+	var OR = new Path(Styles.Default);
 	OR.moveTo(0,0);
     OR.lineTo(s/4,0);
     OR.quadraticCurveTo(new Point(0.71*s, 0), new Point(s, s/2));
@@ -51,11 +65,13 @@ function createOr(x,y){
 	OR.closePath(true);
 	OR.translate(new Point(x-s/2, y-s/2));
 
+	mainGroup.addChild(OR);
+
 	return OR;
 }
 
 function createXor(x,y){
-	var XOR = new CompoundPath(gateStyle);
+	var XOR = new CompoundPath(Styles.Default);
 	XOR.moveTo(0,0);
     XOR.lineTo(s/4,0);
     XOR.quadraticCurveTo(new Point(0.71*s, 0), new Point(s, s/2));
@@ -69,24 +85,27 @@ function createXor(x,y){
 	XOR.quadraticCurveTo(new Point(s/8,s/2), new Point(-s/8,0));
 	XOR.translate(new Point(x-s/2,y-s/2));
 
+	mainGroup.addChild(XOR);
+
 	return XOR;
 }
 
 function createBuf(x,y){
-	var BUF = new Path(gateStyle);
+	var BUF = new Path(Styles.Default);
 	BUF.moveTo(new Point(0,0));
 	BUF.lineTo(new Point(s,s/2));
 	BUF.lineTo(new Point(0,s));
 	BUF.closePath(true);
 	BUF.translate(new Point(x-s/2,y-s/2));
+
+	mainGroup.addChild(BUF);
 	
 	return BUF;
 }
 
 function setStyle(item,style){
+	return;
 	for(attribute in style){
-		console.log(attribute);
-		console.log(style[attribute]);
 		item[attribute] = style[attribute];
 	}
 }
@@ -115,7 +134,7 @@ onMouseDown = function(event){
 	if(!event.modifiers.shift){
 		var i;
 		for(i = 0; i < selected.children.length; ++i){
-			setStyle(selected.children[i],gateStyle);
+			setStyle(selected.children[i],Styles.Default);
 		}
 
 		selected.parent.addChildren(
@@ -124,10 +143,11 @@ onMouseDown = function(event){
 		
 	}
 
-	var hits = mainLayer.hitTest(event.point);
+	var hits = mainGroup.hitTest(event.point,{stroke:false, fill:true});
 	if(hits){
 		selected.addChild(hits.item);
-		setStyle(hits.item,selectedStyle);
+		setStyle(hits.item,Styles.Selected);
+		selected.bringToFront();
 	}
 	else{
 		console.log("nothing clicked!");
