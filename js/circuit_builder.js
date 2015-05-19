@@ -160,6 +160,15 @@ onMouseDrag = function(event){
 	}
 }
 
+onKeyDown = function(event){
+    switch(event.key){
+        case 'space':
+            selected.rotate(45);
+            break;
+        default:
+    }
+}
+
 function getZoom(oldZoom, delta){
 	var scaleFactor = 1.03;	
 	if(delta < 0)

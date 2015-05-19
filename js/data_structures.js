@@ -105,9 +105,9 @@ BinaryTree.prototype = {
 			return this.data[index];
 	},
 	peek: function(){
-		if(root < 0)
+		if(this.root < 0)
 			return undefined;
-		return _peek(root);
+		return this._peek(this.root);
 	},
 	_doFunc: function(func,index){
 		if(index < 0)
@@ -338,8 +338,19 @@ ItemGroup.prototype = {
 	translate: function(delta){
 		this.children.doFunc(function(item){item.translate(delta);});
 	},
+    getBounds: function(){
+        var rect = !this.children.isEmpty() && this.children.peek().bounds;
+        this.children.doFunc(function(item){
+            rect = rect.unite(item.bounds);
+        });
+        return rect;
+    },
 	rotate: function(angle,pivot){
-		pivot = pivot || this.getBounds().center;
+        
+        if(this.children.isEmpty())
+            return;
+        var bounds = this.getBounds();
+		pivot = pivot || (bounds && bounds.center);
 		this.children.doFunc(function(item){item.rotate(angle,pivot);});
 	},
 	setVisible: function(visible){
