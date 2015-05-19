@@ -103,14 +103,14 @@ BinaryTree.prototype = {
 			return this._peek(this.left[index]);
 		else
 			return this.data[index];
-	}	
+	},
 	peek: function(){
-		if(root == -1)
+		if(root < 0)
 			return undefined;
 		return _peek(root);
 	},
 	_doFunc: function(func,index){
-		if(index == -1)
+		if(index < 0)
 			return;
 		
 		this._doFunc(func,this.left[index]);
@@ -207,6 +207,7 @@ BinaryTree.prototype = {
 		//TODO get right-most child of leftmost child
 	},
 	insert: function(val){
+        console.log(val);
 		if(this.tail == this.reserved){
 			this.reserve(this.reserved*2);
 		}
@@ -327,7 +328,7 @@ ItemGroup.prototype = {
 			equiv: function(a,b){return a.id == b.id;}
 		});
 		return tree;
-	}
+	},
 	addChild: function(child){
 		this.children.insert(child);
 	},
@@ -341,10 +342,28 @@ ItemGroup.prototype = {
 		pivot = pivot || this.getBounds().center;
 		this.children.doFunc(function(item){item.rotate(angle,pivot);});
 	},
-	setVisible(visible){
+	setVisible: function(visible){
 		this.children.doFunc(function(item){item.visible = false;});
 	},
-	hitTest(point,options){
-
-	}
+	hitTest: function(point,options){
+        var hits = [];
+        this.children.doFunc(function(item){
+            if(item.hitTest(point,options))
+                hits.push(item);
+        });
+        hits.sort(function(a,b){return a.isBelow(b);});
+        console.log(hits);
+        console.log(hits[0]);
+        return hits[0];
+	},
+    bringToFront: function(){
+        this.children.doFunc(function(item){item.bringToFront();});   
+    },
+    restyle: function(style){
+        this.children.doFunc(function(item){
+            for(attribute in style){
+                item[attribute] = style[attribute];
+            }
+        });
+    }
 };

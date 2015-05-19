@@ -104,7 +104,6 @@ function createBuf(x,y){
 }
 
 function setStyle(item,style){
-	return;
 	for(attribute in style){
 		item[attribute] = style[attribute];
 	}
@@ -132,21 +131,15 @@ onMouseDown = function(event){
 	lastP = view.projectToView(event.point);
 	
 	if(!event.modifiers.shift){
-		var i;
-		for(i = 0; i < selected.children.length; ++i){
-			setStyle(selected.children[i],Styles.Default);
-		}
-
-		selected.parent.addChildren(
-			selected.removeChildren()
-		);
+        selected.restyle(Styles.Default);
+		selected.removeChildren();
 		
 	}
 
-	var hits = mainGroup.hitTest(event.point,{stroke:false, fill:true});
-	if(hits){
-		selected.addChild(hits.item);
-		setStyle(hits.item,Styles.Selected);
+	var hit = mainGroup.hitTest(event.point,{stroke:false, fill:true});
+	if(hit){
+		selected.addChild(hit);
+		setStyle(hit,Styles.Selected);
 		selected.bringToFront();
 	}
 	else{
