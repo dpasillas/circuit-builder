@@ -207,7 +207,7 @@ BinaryTree.prototype = {
 		//TODO get right-most child of leftmost child
 	},
 	insert: function(val){
-        console.log(val);
+        //console.log(val);
 		if(this.tail == this.reserved){
 			this.reserve(this.reserved*2);
 		}
@@ -363,8 +363,8 @@ ItemGroup.prototype = {
                 hits.push(item);
         });
         hits.sort(function(a,b){return a.isBelow(b);});
-        console.log(hits);
-        console.log(hits[0]);
+        //console.log(hits);
+        //console.log(hits[0]);
         return hits[0];
 	},
     bringToFront: function(){
@@ -378,3 +378,5 @@ ItemGroup.prototype = {
         });
     }
 };
+
+window.globals = {};

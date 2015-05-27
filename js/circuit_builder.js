@@ -26,9 +26,9 @@ Styles = {
                         fillColor: new Color(1.0,0.0,0.0,0.5),
                         strokeWidth: 2,
                         dashArray: [4, 4]},
-    Selector:       {strokeColor: new Color('#44AAFF'),
+    Selector:       {strokeColor: new Color(0.525,0.675,0.850),
                         strokeScaling: false,
-                        fillColor: new Color(0.25,0.75,1.0,0.5),
+                        fillColor: new Color(0.65,0.75,0.88,0.5),
                         strokeWidth: 1,
                         dashArray: undefined
                     }
@@ -43,7 +43,7 @@ var selected = new ItemGroup();
 
 createGates();
 
-console.log(view.element.style);
+//console.log(view.element.style);
 
 //create symbols for logic gate primitives
 function createAnd(x,y){
@@ -137,12 +137,6 @@ var selectionRect = null;
 //implemented by paperjs, not standard
 onMouseDown = function(event){
     lastP = view.projectToView(event.point);
-    
-
-    if(!event.modifiers.shift){
-        selected.restyle(Styles.Default);
-        selected.removeChildren();
-    }
 
     var hit = mainGroup.hitTest(event.point,{stroke:false, fill:true});
     if(hit){
@@ -151,6 +145,10 @@ onMouseDown = function(event){
         selected.bringToFront();
     }
     else{
+        if(!event.modifiers.shift){
+            selected.restyle(Styles.Default);
+            selected.removeChildren();
+        }
 
         selectionRect = new Path(Styles.Selector);
         selectionRect.add(event.point);
@@ -163,7 +161,7 @@ onMouseDown = function(event){
 }
 
 onMouseDrag = function(event){
-    console.log("what a drag!");
+    //console.log("what a drag!");
     var p = view.projectToView(event.point);
     var delta = (p - lastP) / view.zoom;
     lastP = p;
@@ -185,6 +183,7 @@ onMouseUp = function(event){
         selectionRect.remove();
         selectionRect = null;
     }
+    rubberBand = false;
 }
 
 onKeyDown = function(event){
