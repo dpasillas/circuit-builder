@@ -1,3 +1,6 @@
+var gb = window.globals;
+var ui = gb.user_input;
+
 //globals
 var canvas = view.element;
 var s = 32;
@@ -33,13 +36,14 @@ Styles = {
                         dashArray: undefined
                     }
 };
+gb.Styles = Styles;
 
 //separate groups so we can toggle visibility
-var mainGroup = new ItemGroup();
-var connectionsGroup = new ItemGroup();
-var gridGroup = new ItemGroup();
+gb.mainGroup = new ItemGroup();
+gb.connectionsGroup = new ItemGroup();
+gb.gridGroup = new ItemGroup();
 
-var selected = new ItemGroup();
+gb.selected = new ItemGroup();
 
 createGates();
 
@@ -55,7 +59,7 @@ function createAnd(x,y){
     AND.closePath(true);
     AND.translate(new Point(x-s/2,y-s/2));
 
-    mainGroup.addChild(AND);
+    gb.mainGroup.addChild(AND);
 
     return AND;
 }
@@ -71,7 +75,7 @@ function createOr(x,y){
     OR.closePath(true);
     OR.translate(new Point(x-s/2, y-s/2));
 
-    mainGroup.addChild(OR);
+    gb.mainGroup.addChild(OR);
 
     return OR;
 }
@@ -91,7 +95,7 @@ function createXor(x,y){
     XOR.quadraticCurveTo(new Point(s/8,s/2), new Point(-s/8,0));
     XOR.translate(new Point(x-s/2,y-s/2));
 
-    mainGroup.addChild(XOR);
+    gb.mainGroup.addChild(XOR);
 
     return XOR;
 }
@@ -104,7 +108,7 @@ function createBuf(x,y){
     BUF.closePath(true);
     BUF.translate(new Point(x-s/2,y-s/2));
 
-    mainGroup.addChild(BUF);
+    gb.mainGroup.addChild(BUF);
     
     return BUF;
 }
@@ -124,97 +128,8 @@ function createGates(){
     createBuf(x+100,y+100);
 }
 
-canvas.onwheel = function(event){
-    if(event.ctrlKey)
-        zoomWithMouse(event);
-    
-
-    return false;
-}
-var lastP = new Point(0,0);
-var rubberBand = false;
-var selectionRect = null;
-//implemented by paperjs, not standard
-onMouseDown = function(event){
-    lastP = view.projectToView(event.point);
-
-    var hit = mainGroup.hitTest(event.point,{stroke:false, fill:true});
-    if(hit){
-        selected.addChild(hit);
-        setStyle(hit,Styles.Selected);
-        selected.bringToFront();
-    }
-    else{
-        if(!event.modifiers.shift){
-            selected.restyle(Styles.Default);
-            selected.removeChildren();
-        }
-
-        selectionRect = new Path(Styles.Selector);
-        selectionRect.add(event.point);
-        selectionRect.add(event.point);
-        selectionRect.add(event.point);
-        selectionRect.add(event.point);
-        selectionRect.closed = true;
-        rubberBand = true;
-    }
-}
-
-onMouseDrag = function(event){
-    //console.log("what a drag!");
-    var p = view.projectToView(event.point);
-    var delta = (p - lastP) / view.zoom;
-    lastP = p;
-    if(event.modifiers.control)
-        view.center -= delta;
-    else{
-        if(rubberBand){
-            selectionRect.segments[1].point += new Point(delta.x,0);
-            selectionRect.segments[2].point += delta;
-            selectionRect.segments[3].point += new Point(0,delta.y);
-        }else{
-            selected.translate(delta);
-        }
-    }
-}
-
-onMouseUp = function(event){
-    if(selectionRect){
-        selectionRect.remove();
-        selectionRect = null;
-    }
-    rubberBand = false;
-}
-
-onKeyDown = function(event){
-    switch(event.key){
-        case 'space':
-            selected.rotate(45);
-            break;
-        default:
-    }
-}
-
-function getZoom(oldZoom, delta){
-    var scaleFactor = 1.03;    
-    if(delta < 0)
-        return oldZoom*scaleFactor;
-    else
-        return oldZoom/scaleFactor;
-}
-
-function zoomWithMouse(event){
-    var limit = 4;
-    var element = view.element;
-    var z = project.view.zoom;
-    var c = view.center;
-    //calculate position of mouse relative to canvas
-    var mouse = new Point(event.clientX - element.offsetLeft + window.pageXOffset,
-                            event.clientY - element.offsetTop + window.pageYOffset);
-    var p = view.viewToProject(mouse);
-    var nz = Math.min(4,Math.max(1/limit,getZoom(z,event.deltaY)));
-    view.zoom = nz;    
-    var offset = p-c;
-    view.center = p - offset*(z/nz);
-}
-
+canvas.onwheel = ui.onwheel;
+onMouseDown = ui.onMouseDown;
+onMouseDrag = ui.onMouseDrag;
+onMouseUp = ui.onMouseUp;
+onKeyDown = ui.onKeyDown;
