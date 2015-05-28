@@ -450,6 +450,15 @@ ItemGroup.prototype = {
                 item[attribute] = style[attribute];
             }
         });
+    },
+    getIntersections: function(item){
+    var intersections = [];
+    this.children.doFunc(
+        function(it.insersects(item)){
+            intersections.push(it);
+        }
+    return intersections;
+    );
     }
 };
 
