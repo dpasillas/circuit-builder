@@ -14,10 +14,11 @@ ui.onMouseDown = function(event){
 
     hit = gb.mainGroup.hitTest(event.point,{stroke:false, fill:true});
     if(hit){
-        if(!event.modifiers.shift)
+        if(!gb.selected.contains(hit) && !event.modifiers.shift)
             gb.selected.removeChildren();
-            
+        
         alreadySelected = !gb.selected.addChild(hit);
+
         gb.selected.bringToFront();
     }
     else{
