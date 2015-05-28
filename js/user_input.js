@@ -6,21 +6,24 @@ var ui = window.globals.user_input;
 var lastP = new Point();
 var selectionRect = null;
 var rubberBand = false;
+var hit = null;
+var alreadySelected = false;
 
 ui.onMouseDown = function(event){
     lastP = view.projectToView(event.point);
 
-    var hit = gb.mainGroup.hitTest(event.point,{stroke:false, fill:true});
+    hit = gb.mainGroup.hitTest(event.point,{stroke:false, fill:true});
     if(hit){
-        gb.selected.addChild(hit);
-        gb.setStyle(hit,Styles.Selected);
+        if(!event.modifiers.shift)
+            gb.selected.removeChildren();
+            
+        alreadySelected = !gb.selected.addChild(hit);
         gb.selected.bringToFront();
     }
     else{
-        if(!event.modifiers.shift){
-            gb.selected.restyle(Styles.Default);
+        alreadySelected = false;
+        if(!event.modifiers.shift)
             gb.selected.removeChildren();
-        }
 
         selectionRect = new Path(Styles.Selector);
         selectionRect.add(event.point);
@@ -81,20 +84,32 @@ ui.onMouseDrag = function(event){
 };
 
 ui.onMouseUp = function(event){
+    if(event.downPoint.equals(event.point))
+        ui.onClick(event);
     if(selectionRect){
         selectionRect.remove();
         selectionRect = null;
     }
     rubberBand = false;
+    alreadySelected = false;
 };
+
+ui.onClick = function(event){
+    if(alreadySelected && hit && event.modifiers.shift && gb.selected.contains(hit)){
+        gb.selected.removeChild(hit);
+        hit = null;
+    }
+}
 
 ui.onKeyDown = function(event){
     switch(event.key){
         case 'space':
             gb.selected.rotate(45);
+            return false;
             break;
         default:
     }
+    return true;
 }
 
 gb.setStyle = function (item,style){
@@ -102,3 +117,5 @@ gb.setStyle = function (item,style){
         item[attribute] = style[attribute];
     }
 };
+
+gb.ready[0] = true;

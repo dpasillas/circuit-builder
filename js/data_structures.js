@@ -144,8 +144,8 @@ BinaryTree.prototype = {
 	},
 	setChild: function(i,dir,child){
 		if(i < 0)
-			return;
-		if(dir == Dir.LEFT)
+		    root = child;//return;
+		else if(dir == Dir.LEFT)
 			this.left[i] = child;
 		else if(dir == Dir.RIGHT)
 			this.right[i] = child;
@@ -187,6 +187,51 @@ BinaryTree.prototype = {
 		this.weight[index] = 0;
 		this.free.enqueue(index);
 	},
+	_extreme: function(index, parent, dir){
+	    var child = this.getChild(index,dir);
+	    if(child != -1)
+	        return this._extreme(child,index,dir);
+	    else
+	        return [index,parent];
+	},
+	_remove: function(index,parent,val){
+	    if(index == -1)
+	        return null;
+	    if(this.equiv(val,this.data[index])){
+	        if(this.right[index] != -1){
+	            var rl = this._extreme(this.right[index],index,Dir.LEFT);
+	            // swap data with right-leftmost
+	            var tmp = this.data[index];
+	            this.data[index] = this.data[rl[0]];
+	            this.data[rl[0]] = tmp;
+	            // now that the data resides at rl[0], we can begin to remove it
+	            var dir = (index === rl[1])?Dir.RIGHT:Dir.LEFT;
+	            var rlc = this.getChild(rl[0], Dir.RIGHT);
+	            
+	            this.setChild(rl[1],dir,rlc);
+	            // rl[0] is now orphaned, we can blow it away
+	            var data = this.data[rl[0]];
+	            this.blowAway(rl[0]);
+	            return data;
+	            
+	        }else{
+	            //get index's direction relative to parent
+	            var dir = (this.right[parent] == index)?Dir.RIGHT:Dir.LEFT;
+	            //replace index with its left child
+	            this.setChild(parent,dir,this.getChild(index,Dir.LEFT));
+	            //extract data and blow away, return
+	            var data = this.data[index];
+	            this.blowAway(index);
+	            return data;
+	        }
+	    }
+        var dir = this.getDir(index,val);
+        var child = this.getChild(index,dir);
+        return this._remove(child,index,val);
+	},
+	remove: function(val){
+	    return this._remove(this.root,-1,val);
+	},
 	_removeFirst: function(index, parent){
 		if(this.left[index] != -1){
 			var data = this._removeFirst(this.left[index],index);
@@ -204,7 +249,20 @@ BinaryTree.prototype = {
 		if(this.root < 0)
 			return null;
 		return this._removeFirst(this.root,-1);
-		//TODO get right-most child of leftmost child
+	},
+	
+	_find: function(i,val){
+	    if(i <= -1)
+	        return false;
+	    if(this.equiv(val,this.data[i]))
+	        return true;
+	    
+	    var dir = this.getDir(i,val);
+	    var child = this.getChild(i,dir);
+	    return this._find(child,val);
+	},
+	find: function(val){
+	    return this._find(this.root,val);
 	},
 	insert: function(val){
         //console.log(val);
@@ -214,9 +272,10 @@ BinaryTree.prototype = {
 		
 		if(this.root < 0) {
 			this.root = this.store(val);
+			return true;
 		}
 		else {
-			this.insertAt(this.root,val,-1,Dir.NONE);
+			return this.insertAt(this.root,val,-1,Dir.NONE);
 		}
 		
 	},
@@ -319,6 +378,8 @@ BinaryTree.prototype = {
 //	this cause the items to be removed from all other groups as well.
 function ItemGroup(){
 	this.children = this._createTree();
+	this.onRemove = undefined;
+	this.onAdd = undefined;
 }
 
 ItemGroup.prototype = {
@@ -330,10 +391,23 @@ ItemGroup.prototype = {
 		return tree;
 	},
 	addChild: function(child){
-		this.children.insert(child);
+		var ret = this.children.insert(child);
+		
+		ret && this.onAdd && this.onAdd(child);
+		
+		return ret;
+	},
+	removeChild: function(child){
+	    this.children.remove(child) &&
+	    this.onRemove &&
+	    this.onRemove(child);
+	},
+	contains: function(item){
+	    return this.children.find(item);
 	},
 	removeChildren: function(){
-		this.children = new BinaryTree
+	    this.onRemove && this.children.doFunc(this.onRemove);
+		this.children = new BinaryTree();
 	},
 	translate: function(delta){
 		this.children.doFunc(function(item){item.translate(delta);});
@@ -380,3 +454,4 @@ ItemGroup.prototype = {
 };
 
 window.globals = {};
+window.globals.ready = [false,false];

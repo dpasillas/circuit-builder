@@ -1,4 +1,7 @@
 var gb = window.globals;
+while(!gb.ready[0])
+    console.log("not ready!");
+
 var ui = gb.user_input;
 
 //globals
@@ -44,6 +47,12 @@ gb.connectionsGroup = new ItemGroup();
 gb.gridGroup = new ItemGroup();
 
 gb.selected = new ItemGroup();
+gb.selected.onRemove = function(item){
+    gb.setStyle(item,Styles.Default);
+};
+gb.selected.onAdd = function(item){
+    gb.setStyle(item,Styles.Selected); 
+};
 
 createGates();
 
