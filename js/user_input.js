@@ -84,6 +84,10 @@ ui.onMouseDrag = function(event){
             // get an array of intersected items that intersect with the selection box
             intersectedObjs = gb.mainGroup.getIntersections(selectionRect);
             
+            for(var i = 0; i < intersectedObjs.length; ++i){
+                gb.selected.addChild(intersectedObjs[i]);
+            }
+            
             /* //  Print id of selected items for debugging
             for(var i = 0; i < selectedObjs.length; ++i){
                 console.log(selectedObjs[i].id);
