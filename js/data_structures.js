@@ -451,16 +451,31 @@ ItemGroup.prototype = {
             }
         });
     },
+    _intersect: function(rect){
+        this.children.doFunc(
+            function(item){
+                item._ints = item.intersects(rect) || item.isInside(rect.bounds);
+            }
+        );
+    },
     getIntersections: function(rect){
+        this._intersect(rect);
         var intersections = [];
         this.children.doFunc(
             function(item){
-                if(item.intersects(rect) || item.isInside(rect.bounds))
-                    intersections.push(item);
-                
+                intersections.push(item._ints);
             }
         );
         return intersections;
+    },
+    toggle: function(changes){
+        var i = 0;
+        this.children.doFunc(
+            function(item){
+                if(changes[i++])
+                    item.selected = !item.selected;
+            }
+        );
     }
 };
 
