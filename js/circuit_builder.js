@@ -1,16 +1,9 @@
 var gb = window.globals;
 
 
-doIt = function(){
-
-	if(!gb.ready[0])
-	{
-		console.log("Not Ready!");
-	 	setTimeout(doit,100);
-		return;
-	}
+var loadCB = function(){
 	var ui = gb.user_input;
-
+    //new gb.LogicGate({});
 	//globals
 	var canvas = view.element;
 	var s = 32;
@@ -145,10 +138,11 @@ doIt = function(){
 	}
 
 	canvas.onwheel = ui.onwheel;
-	onMouseDown = ui.onMouseDown;
-	onMouseDrag = ui.onMouseDrag;
-	onMouseUp = ui.onMouseUp;
-	onKeyDown = ui.onKeyDown;
+    var tool = new Tool();
+	tool.onMouseDown = ui.onMouseDown;
+	tool.onMouseDrag = ui.onMouseDrag;
+	tool.onMouseUp = ui.onMouseUp;
+	tool.onKeyDown = ui.onKeyDown;
 }
 
-doIt();
+gb.tryLoad(loadCB,2);

@@ -2,7 +2,7 @@
 function Queue(size) {
 	this.data = [];
 	this.reserved = 0;
-	var count = (Number.isInteger(size) && size > 16 && size) || 32;
+	var count = (Number.isInteger(size) && size > 1 && size) || 2;
 	this.reserve(count);
 	//keep track of where we'll insert/remove items
 	this.head = 0;
@@ -84,9 +84,9 @@ function BinaryTree(args) {
 	this.left = [];
 	this.right = [];
 	//keep track of empty spaces we can use, so data is roughly contiguous in memory.
-	this.free = new Queue(100);
+	this.free = new Queue(2);
 	this.weight = [];
-	var count = (Number.isInteger(args.size) && args.size > 31 && args.size) || 256;
+	var count = (Number.isInteger(args.size) && args.size > 1 && args.size) || 2;
 	this.reserve(count);
 
 	this.root = -1;
@@ -480,4 +480,15 @@ ItemGroup.prototype = {
 };
 
 window.globals = {};
-window.globals.ready = [false,false];
+window.globals.ready = [true,false,false,false,false];
+
+window.globals.tryLoad = function(func,i){
+    if(!window.globals.ready[i])
+	{
+		console.log("Not Ready: "+i);
+	 	setTimeout(window.globals.tryLoad,10,func,i);
+		return;
+	}
+    func();
+    window.globals.ready[i+1] = true;
+}
