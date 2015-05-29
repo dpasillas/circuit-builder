@@ -8,13 +8,14 @@ var selectionRect = null;
 var rubberBand = false;
 var hit = null;
 var alreadySelected = false;
+var zoomPan = "option"
 
 ui.onMouseDown = function(event){
     lastP = view.projectToView(event.point);
 
     hit = gb.mainGroup.hitTest(event.point,{stroke:false, fill:true});
     if(hit){
-        if(!gb.selected.contains(hit) && !event.modifiers.shift)
+        if(!gb.selected.contains(hit) && !event.modifiers[zoomPan])
             gb.selected.removeChildren();
         
         alreadySelected = !gb.selected.addChild(hit);
@@ -23,7 +24,7 @@ ui.onMouseDown = function(event){
     }
     else{
         alreadySelected = false;
-        if(!event.modifiers.shift)
+        if(!event.modifiers[zoomPan])
             gb.selected.removeChildren();
 
         selectionRect = new Path(Styles.Selector);
@@ -96,7 +97,7 @@ ui.onMouseUp = function(event){
 };
 
 ui.onClick = function(event){
-    if(alreadySelected && hit && event.modifiers.shift && gb.selected.contains(hit)){
+    if(alreadySelected && hit && event.modifiers[zoomPan] && gb.selected.contains(hit)){
         gb.selected.removeChild(hit);
         hit = null;
     }

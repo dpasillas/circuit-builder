@@ -452,13 +452,14 @@ ItemGroup.prototype = {
         });
     },
     getIntersections: function(item){
-    var intersections = [];
-    this.children.doFunc(
-        function(it.insersects(item)){
-            intersections.push(it);
-        }
-    return intersections;
-    );
+        var intersections = [];
+        this.children.doFunc(
+            function(it){
+                if(it.intersects(item))
+                    intersections.push(it);
+            }
+        );
+        return intersections;
     }
 };
 
