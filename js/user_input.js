@@ -8,14 +8,14 @@ var selectionRect = null;
 var rubberBand = false;
 var hit = null;
 var alreadySelected = false;
-var zoomPan = "option"
-
+var ms = "shift"
+var zp = "option"
 ui.onMouseDown = function(event){
     lastP = view.projectToView(event.point);
 
     hit = gb.mainGroup.hitTest(event.point,{stroke:false, fill:true});
     if(hit){
-        if(!gb.selected.contains(hit) && !event.modifiers[zoomPan])
+        if(!gb.selected.contains(hit) && !event.modifiers[ms])
             gb.selected.removeChildren();
         
         alreadySelected = !gb.selected.addChild(hit);
@@ -24,7 +24,7 @@ ui.onMouseDown = function(event){
     }
     else{
         alreadySelected = false;
-        if(!event.modifiers[zoomPan])
+        if(!event.modifiers[ms])
             gb.selected.removeChildren();
 
         selectionRect = new Path(Styles.Selector);
@@ -58,9 +58,13 @@ gb.zoomWithMouse = function (event){
     var offset = p-c;
     view.center = p - offset*(z/nz);
 }
+var tostd = {
+    option: "altKey",
+    control: "ctrlKey"
+};
 
 ui.onwheel = function(event){
-    if(event.ctrlKey)
+    if(event[tostd[zp]])
         gb.zoomWithMouse(event);
     
 
@@ -73,7 +77,7 @@ ui.onMouseDrag = function(event){
     var p = view.projectToView(event.point);
     var delta = (p - lastP) / view.zoom;
     lastP = p;
-    if(event.modifiers.control)
+    if(event.modifiers[zp])
         view.center -= delta;
     else{
         if(rubberBand){
@@ -113,7 +117,7 @@ ui.onMouseUp = function(event){
 };
 
 ui.onClick = function(event){
-    if(alreadySelected && hit && event.modifiers[zoomPan] && gb.selected.contains(hit)){
+    if(alreadySelected && hit && event.modifiers[ms] && gb.selected.contains(hit)){
         gb.selected.removeChild(hit);
         hit = null;
     }
