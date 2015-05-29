@@ -451,12 +451,12 @@ ItemGroup.prototype = {
             }
         });
     },
-    getIntersections: function(item){
+    getIntersections: function(rect){
         var intersections = [];
         this.children.doFunc(
-            function(it){
-                if(it.intersects(item))
-                    intersections.push(it);
+            function(item){
+                if(item.intersects(rect) || item.isInside(rect.bounds))
+                    intersections.push(item);
             }
         );
         return intersections;
