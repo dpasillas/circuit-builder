@@ -66,6 +66,7 @@ ui.onwheel = function(event){
     return false;
 }
 
+var prevIntersectedObjs = [];
 ui.onMouseDrag = function(event){
     //console.log("what a drag!");
     var p = view.projectToView(event.point);
@@ -78,6 +79,16 @@ ui.onMouseDrag = function(event){
             selectionRect.segments[1].point += new Point(delta.x,0);
             selectionRect.segments[2].point += delta;
             selectionRect.segments[3].point += new Point(0,delta.y);
+            
+            // get an array of intersected items that intersect with the selection box
+            intersectedObjs = gb.mainGroup.getIntersections(selectionRect);
+            
+            /* //  Print id of selected items for debugging
+            for(var i = 0; i < selectedObjs.length; ++i){
+                console.log(selectedObjs[i].id);
+            }
+            */
+            
         }else{
             gb.selected.translate(delta);
         }
@@ -93,6 +104,7 @@ ui.onMouseUp = function(event){
     }
     rubberBand = false;
     alreadySelected = false;
+    prevIntersectedObjs = [];
 };
 
 ui.onClick = function(event){
