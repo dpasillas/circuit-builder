@@ -36,6 +36,7 @@ var loadUI = function(){
             selectionRect.add(event.point);
             selectionRect.closed = true;
             rubberBand = true;
+            prevIntersectedObjs = gb.mainGroup.getIntersections(selectionRect);
         }
     };
     gb.getZoom = function (oldZoom, delta){
@@ -60,6 +61,7 @@ var loadUI = function(){
         var offset = p-c;
         view.center = p - offset*(z/nz);
     }
+
     var tostd = {
         option: "altKey",
         control: "ctrlKey"
@@ -68,7 +70,6 @@ var loadUI = function(){
     ui.onwheel = function(event){
         if(event[tostd[zp]])
             gb.zoomWithMouse(event);
-
 
         return false;
     }
@@ -86,20 +87,15 @@ var loadUI = function(){
                 selectionRect.segments[1].point += new Point(delta.x,0);
                 selectionRect.segments[2].point += delta;
                 selectionRect.segments[3].point += new Point(0,delta.y);
-
+            
                 // get an array of intersected items that intersect with the selection box
-                intersectedObjs = gb.mainGroup.getIntersections(selectionRect);
-
-                for(var i = 0; i < intersectedObjs.length; ++i){
-                    gb.selected.addChild(intersectedObjs[i]);
+                var intersectedObjs = gb.mainGroup.getIntersections(selectionRect);
+                var changes = new Array(prevIntersectedObjs.length);
+                for(i in intersectedObjs){
+                    changes[i] = intersectedObjs[i] != prevIntersectedObjs[i];
                 }
-
-                /* //  Print id of selected items for debugging
-                for(var i = 0; i < selectedObjs.length; ++i){
-                    console.log(selectedObjs[i].id);
-                }
-                */
-
+                gb.mainGroup.toggle(changes);
+                prevIntersectedObjs = intersectedObjs;
             }else{
                 gb.selected.translate(delta);
             }
