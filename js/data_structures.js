@@ -457,6 +457,7 @@ ItemGroup.prototype = {
             function(item){
                 if(item.intersects(rect) || item.isInside(rect.bounds))
                     intersections.push(item);
+                
             }
         );
         return intersections;

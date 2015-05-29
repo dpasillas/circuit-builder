@@ -86,17 +86,13 @@ ui.onMouseDrag = function(event){
             selectionRect.segments[3].point += new Point(0,delta.y);
             
             // get an array of intersected items that intersect with the selection box
-            intersectedObjs = gb.mainGroup.getIntersections(selectionRect);
-            
-            for(var i = 0; i < intersectedObjs.length; ++i){
+            var intersectedObjs = gb.mainGroup.getIntersections(selectionRect);
+            var changes = new Array(prevIntersectedObjs.length);
+            for(i in intersectedObjs){
+                changes[i] = intersectedObjs[i] != prevIntersectedObjs[i];
                 gb.selected.addChild(intersectedObjs[i]);
             }
             
-            /* //  Print id of selected items for debugging
-            for(var i = 0; i < selectedObjs.length; ++i){
-                console.log(selectedObjs[i].id);
-            }
-            */
             
         }else{
             gb.selected.translate(delta);
