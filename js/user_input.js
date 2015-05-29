@@ -34,6 +34,7 @@ ui.onMouseDown = function(event){
         selectionRect.add(event.point);
         selectionRect.closed = true;
         rubberBand = true;
+        prevIntersectedObjs = gb.mainGroup.getIntersections(selectionRect);
     }
 };
 gb.getZoom = function (oldZoom, delta){
@@ -90,10 +91,9 @@ ui.onMouseDrag = function(event){
             var changes = new Array(prevIntersectedObjs.length);
             for(i in intersectedObjs){
                 changes[i] = intersectedObjs[i] != prevIntersectedObjs[i];
-                gb.selected.addChild(intersectedObjs[i]);
             }
-            
-            
+            gb.mainGroup.toggle(changes);
+            prevIntersectedObjs = intersectedObjs;
         }else{
             gb.selected.translate(delta);
         }
